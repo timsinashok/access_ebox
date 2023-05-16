@@ -275,7 +275,7 @@ class NEXTPMbeseecher(Beseecher):
     """Instantiate an object of this class by specifying the serial port
     device. E.g.:
 
-    pm = NEXTPMbeseecher(port=/dev/ttyAMA0)
+    pm = NEXTPMbeseecher(port="/dev/ttyAMA0")
 
     Baudrate, parity, etc. may also be specified, but they default to the
     values required by the Next-PM sensor. Any change should be unnecessary.
