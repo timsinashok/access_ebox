@@ -400,7 +400,7 @@ class NEXTPMbeseecher(Beseecher):
             raise ValueError(
                 f'NextPM on port {self.port} replied an empty string or ' +
                 'failed the checksum.\n' +
-                'Last reply after {N_attempts} was:\n' +
+                f'Last reply after {N_attempts} attempts was:\n' +
                 f'{rply}')
         return rply
 
