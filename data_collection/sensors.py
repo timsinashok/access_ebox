@@ -50,9 +50,9 @@ sensors = []
 # initialize pm sensors
 ports = ['/dev/ttyAMA0', '/dev/ttyAMA1']
 
-for i in range(2):
+for port in ports:
     try:
-        sensors.append(access.NEXTPMbeseecher(port=ports[i]))
+        sensors.append(access.NEXTPMbeseecher(port=port))
     except Exception as e:
         sensors.append(access.ErrorBeseecher('particulate_matter',
                                              'nextpm',
