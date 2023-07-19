@@ -51,6 +51,69 @@ threads = [None] * len(sens.sensors)
 
 # functions
 
+def format_null(sensor: str, index: int = 0, sens_type: str = "") -> dict:
+    """    
+    Creates a dictionary with predefined keys and None values tailored to different sensor types.
+    @param sensor: specific sensor identifier (e.g. "co2_sensor, "air_sensor", "particulate_matter").
+                   "gps" can be passed as sensor to return a dictionary with gps keys and None values
+    @param index: index of the sensor, if required   
+    @param sens_type: model of the sensor (e.g., "scd30," "bme280," "nextpm"), if required
+    @return: dictionary with predefined keys and None values                      
+    """ 
+    data = {
+        'type': sens_type,
+        'sensor': f"{sensor}{index}",
+    }
+
+    if sensor == "co2_sensor":
+        data.update({
+            'co2': None,
+        })
+    elif sensor == "air_sensor":
+        data.update({
+            'humidity': None,
+            'temperature': None,
+            'pressure': None,
+        })
+    elif sensor == "particulate_matter":
+        data.update({
+            'PM1count': None,
+            'PM2,5count': None,
+            'PM10count': None,
+            'PM1mass': None,
+            'PM2,5mass': None,
+            'PM10mass': None,
+            'sensor_T': None,
+            'sensor_RH': None,
+            'diagnostics': {
+                'Degraded': None,
+                'Notready': None,
+                'Eccess_RH': None,
+                'T_RH_off': None,
+                'Fan_error': None,
+                'Mem_error': None,
+                'Las_error': None,
+            },
+        })
+    elif sensor == 'gps':
+        CPUdate, CPUtime = datetime.datetime.utcnow().isoformat().split('T')
+        data = {
+            'date': CPUdate,
+            'time': CPUtime.split('.')[0],
+            'latitude': None,
+            'lat_dir': None,
+            'longitude': None,
+            'lon_dir': None,
+            'altitude': None,
+            'alt_unit': None,
+            'num_sats': None,
+            'PDOP': None,
+            'HDOP': None,
+            'VDOP': None,
+        }
+
+    return data
+
 
 def write_diag(error_name: str, error: str) -> None:
     '''
@@ -138,11 +201,10 @@ def measure(sensor: Beseecher, sensor_category: str, index: int) -> None:
         data = sensor.measure()
     except Exception as e:  # must catch all exceptions as each sensor may
         # raise its own from package library
+        data = format_null(sensor.SENSOR, sensor.index, sensor.TYPE)
         modules.log(f'Error collecting info for {sensor_category}{index}, ' +
                     f'{sensor.TYPE}')
         write_diag(f'{sensor_category}{index}', str(e))
-        # raise(e) # for testing right now, exception handling later
-        return None  # end method, nothing to add to global data_to_save
 
     # check if there are any diagnostics to report
     if 'diagnostics' in data.keys():
@@ -218,7 +280,7 @@ def collect_gps_data() -> dict:
     '''
 
     global lock
-
+    gps_data = format_null(sensor="gps") # initialize gps data
     try:
         gps_data = sens.gps.fix()
 
