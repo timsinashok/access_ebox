@@ -175,9 +175,7 @@ app.config['MAX_CONTENT_LENGTH'] = 1024 * 128  # max file size (in KB)
 
 mongodb = mongo.Mongo(MONGO_ADDR,
                       MONGO_PORT,
-                      DATABASE,
-                      username=secret.username,
-                      password=secret.password)
+                      DATABASE)
 
 # check if all necessary folders / connections work
 init_data()
@@ -336,5 +334,5 @@ def get_data(url: str) -> str:
     mongodb.upload_to_mongodb(files.stream_to_json(datafile),
                               files.get_date(datafile.filename),
                               station_num)
-
+    
     return '200'

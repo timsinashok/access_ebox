@@ -31,7 +31,7 @@ except ModuleNotFoundError:
 ##########
 
 # constants declaration
-URL = 'https://10.224.83.51:3500/upload/'
+URL = 'https://<ip>:<port>/upload/'
 FOLDER = '/home/pi/data_logs/'
 DEST_FOLDER = '/home/pi/sent_files/'
 VERIFY = os.path.join(modules.HOME, 'cert.pem')
