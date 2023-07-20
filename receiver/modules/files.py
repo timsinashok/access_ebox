@@ -60,6 +60,7 @@ def verify_checksum(file_data: FileStorage, chksm: str) -> True:
     '''
 
     # get file stream data
+    #p7
     file_stream = file_data.stream
     file_stream.seek(0)
 
@@ -125,6 +126,7 @@ def verify_save_file(data_file: FileStorage,
                                 secure_filename(data_file.filename))
 
     # save file
+    data_file.stream.seek(0)
     data_file.save(storage_name)
 
     # check to save checksum
