@@ -41,19 +41,15 @@ class Mongo:
     def __init__(self,
                  connection_ip: str,
                  connection_port: str,
-                 db: str,
-                 username: str,
-                 password: str) -> None:
+                 db: str) -> None:
         '''
         connect to Mongo
         @param connection_ip ip address of mongo server
         @param connection_port port number of mongo server
         @param db specific database in that mongo server
         '''
-        self.client = pymongo.MongoClient(connection_ip,
-                                          connection_port,
-                                          username=username,
-                                          password=password)
+
+        self.client = pymongo.MongoClient(connection_ip, connection_port)
         self.db = self.client[db]
 
     def test_connection(self) -> bool:
@@ -116,20 +112,25 @@ class Mongo:
         '''
 
         # collect datetime
-        upload_dict['gps.datetime'] = datetime.datetime.strptime(
+        upload_dict['datetime'] = datetime.datetime.strptime(
             f'{gps_data["date"]}T{gps_data["time"]}Z',
             '%Y-%m-%dT%H:%M:%SZ'
             )
 
+        gps_dict = {}
+
+        gps_dict['sensor'] = "gps"
+        gps_dict['index'] = 0
         # collect long/lat
-        upload_dict['gps.position'] = \
+        gps_dict['position'] = \
             [gps_data['longitude'], gps_data['latitude']]
+        
         # mongo has longitude always before latitude when dealing with position
         # data
 
         # collect other fields except the following:
         collected_fields = \
-            ('date', 'time', 'latitude', 'longitude', 'alt_unit')
+            ('date', 'time', 'latitude', 'longitude') #, 'alt_unit')
         # these have already been collected / postprocessed
         # lastly, alt_unit will be a single value rather than an array so it
         #   won't be pushed into mongo with the rest of the data.
@@ -138,9 +139,11 @@ class Mongo:
             if field in collected_fields:
                 continue
 
-            upload_dict[f'gps.{field}'] = value
+            gps_dict[f'{field}'] = value
 
-    def __collect_sensor__(self, sensor_data: dict,
+        upload_dict['gps'] = gps_dict
+
+    def __collect_sensor__(self, sensor_data: list,
                            sensor_name: str,
                            upload_dict: dict) -> None:
         '''
@@ -159,16 +162,77 @@ class Mongo:
             # iterate through the dictionary and create the mongo nesting
             # scheme
             if info is None:
+                self.format_null(sensor_name, i, upload_dict)
                 continue
-            upload_dict.update(
-                {f'{sensor_name}.{key}.{i}': value
-                 for key, value in info.items()}
-            )
+
+            # upload_dict.update(
+            #     {f'{sensor_name}.{key}.{i}': value
+            #      for key, value in info.items()}
+            # )
 
             # remove sensor and type attributes (these aren't lists)
             # remove unwanted attributes
-            for unwanted in ('sensor', 'type', 'diagnostics'):
-                upload_dict.pop(f'{sensor_name}.{unwanted}.{i}', None)
+
+            sensor_dict = {}
+
+            sensor_dict[f'sensor'] = sensor_name
+            sensor_dict[f'index'] = i
+
+            unwanted = ('diagnostics', 'sensor')
+
+            for field, value in info.items():
+                # skip these fields
+                if field in unwanted:
+                    continue
+
+                sensor_dict[f'{field}'] = value
+
+            upload_dict[f'{sensor_name}+{i}'] = sensor_dict
+
+            # for unwanted in ('diagnostics'):
+            #     upload_dict.pop(f'{sensor_name}.{unwanted}.{i}', None)
+
+    def format_null(self, sensor_name: str, i: int, upload_dict: dict):
+
+        sensor_dict = {'sensor' : sensor_name, 'index' : i}
+
+        if sensor_name == "particulate_matter":
+            sensor_dict.update({'type' : None, 
+                           'PM1count' : None, 
+                           'PM2,5count' : None, 
+                           'PM10count': None,
+                           'PM1mass' : None,
+                           'PM2,5mass' : None,
+                           'PM10mass' : None,
+                           'sensor_T' : None,
+                           'sensor_RH' : None})
+            # upload_dict.update([(f'{sensor_name}+{i}.type', None), 
+            #                     (f'{sensor_name}+{i}.PM1count', None), 
+            #                     (f'{sensor_name}+{i}.PM2,5count', None), 
+            #                     (f'{sensor_name}+{i}.PM10count', None), 
+            #                     (f'{sensor_name}+{i}.PM1mass', None), 
+            #                     (f'{sensor_name}+{i}.PM2,5mass', None), 
+            #                     (f'{sensor_name}+{i}.PM10mass', None), 
+            #                     (f'{sensor_name}+{i}.sensor_T', None), 
+            #                     (f'{sensor_name}+{i}.sensor_RH', None)])
+            
+        elif sensor_name == "air_sensor":
+            sensor_dict.update({'type' : None, 
+                           'humidity' : None, 
+                           'temperature' : None, 
+                           'pressure': None})
+            # upload_dict.update([(f'{sensor_name}+{i}.type', None), 
+            #                     (f'{sensor_name}+{i}.humidity', None), 
+            #                     (f'{sensor_name}+{i}.temperature', None), 
+            #                     (f'{sensor_name}+{i}.pressure', None)])
+            
+        elif sensor_name == "co2_sensor":
+            sensor_dict.update({'co2' : None})
+            
+        upload_dict[f'{sensor_name}+{i}'] = sensor_dict
+            # upload_dict.update([(f'{sensor_name}+{i}.co2', None)])
+        
+
 
     def __make_gps_template__(self, gps_data: dict, template: dict) -> None:
         '''
@@ -319,8 +383,8 @@ class Mongo:
         @param station_num string station<num> (i.e station2)
         '''
         # check if there is already a month or not, if not, create template
-        if self.db[station_num].find_one({'month': month}) is None:
-            self.__create_template__(month, station_num, raw_json)
+        # if self.db[station_num].find_one({'month': month}) is None:
+        #     self.__create_template__(month, station_num, raw_json)
 
         data_to_upload = {}
 
@@ -335,8 +399,9 @@ class Mongo:
             self.__collect_sensor__(raw_json[sensor], sensor, data_to_upload)
 
         # upload to mongo
-        self.db[station_num].update_one({'month': month}, {'$push':
-                                                           data_to_upload})
+        self.db[station_num].insert_one(data_to_upload)
+        # self.db[station_num].update_one({'month': month}, {'$push':
+        #                                                    data_to_upload})
 
     def upload_config(self, station_num: str, config_data: dict) -> None:
         '''
