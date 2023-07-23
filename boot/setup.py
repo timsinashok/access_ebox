@@ -32,7 +32,7 @@ import station_id as station
 ##########
 
 NAME = 'access'
-URL = 'https://10.224.83.51:3500/'
+URL = 'https://<ip>:<port>/'
 
 ##########
 

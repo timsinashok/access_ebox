@@ -334,5 +334,5 @@ def get_data(url: str) -> str:
     mongodb.upload_to_mongodb(files.stream_to_json(datafile),
                               files.get_date(datafile.filename),
                               station_num)
-    
+
     return '200'

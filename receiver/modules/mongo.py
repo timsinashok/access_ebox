@@ -164,12 +164,7 @@ class Mongo:
             if info is None:
                 self.format_null(sensor_name, i, upload_dict)
                 continue
-
-            # upload_dict.update(
-            #     {f'{sensor_name}.{key}.{i}': value
-            #      for key, value in info.items()}
-            # )
-
+            
             # remove sensor and type attributes (these aren't lists)
             # remove unwanted attributes
 
