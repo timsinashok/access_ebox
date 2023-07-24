@@ -68,7 +68,17 @@ $ pip3 install pymongo
  |   |-- 2022_11.txt
  |   </>
  |   |-- <year>_<month>.txt
- |
+ |-- voila/
+ |-- |-- files/
+ |-- |-- |-- ACCESS.png
+ |-- |-- |-- iot_data_dashboard.ipynb
+ |-- |-- |-- gen_files.py
+ |-- |-- |-- iot_data_dashboard.ipynb
+ |-- |-- |-- Station1_2022-07.csv
+ |-- |-- |-- Station1_2022-07.nc
+ |-- |-- |-- Station2_2022-08.csv
+ |-- |-- </>
+ |-- |-- |-- Station<station number>_<year>-<month>.<csv/nc>
 ```
 
 ### Related Files
