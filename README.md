@@ -221,79 +221,69 @@ Below is a sample configuration document. Recalll the `id` is a unique hexadecim
 }
 ```
 
-Below is a sample data document based on the one found at the end of the documentation. There are differences in how mongo and the files will be stored. They are designed for people to request entire bulks of monthly data. All arrays act as parallel arrays, allowing for ease of plotting. All months follow the naming convention `MM_YYYY`. All fields stored in arrays act as a timeseries for that month, with new entries appended to the end. To differentiate between multiple sensors, each sensor in a station is mapped to its respective index (i.e "0" or "1" in this case since there are 2 of each sensor). 
+Below is a sample data document. There are differences in how mongo and the files will be stored. The sensors are unpacked from the arrays in the .json files, and each sensor is its own object, containing its sensor type, index, type, and its collected data. The datetime field is the primary method of indexing. 
 
 ```json
 {
-    "month": "2022_07",
-    "particulate_matter": {
-        "PM1count": {
-            "0": [174],
-            "1": [176]
-        },
-        "PM2,5count": {
-            "0": [175],
-            "1": [178]
-        },
-        "PM10count": {
-            "0": [176],
-            "1": [178]
-        },
-        "PM1mass": {
-            "0": [12.8],
-            "1": [12.6]
-        },
-        "PM2,5mass": {
-            "0": [20.8],
-            "1": [20.6]
-        },
-        "PM10mass": {
-            "0": [40.4],
-            "1": [43.7]
-        },
-        "sensor_T": {
-            "0": [36.15],
-            "1": [36.0]
-        },
-        "sensor_RH": {
-            "0": [66.22],
-            "1": [66.01]
-        },
-        "type": {
-            "0": "nextpm",
-            "1": "nextpm"
-        }
-    },
-    "air_sensor": {
-        "type": {
-            "0": "bme280",
-            "1": "ms8607"
-        },
-        "humidity": {
-            "0": [63.82468880562936],
-            "1": [64.14846801757812]
-        },
-        "temperature": {
-            "0": [35.023828125],
-            "1": [35.04]
-        },
-        "pressure": {
-            "0": [994.0989164570198],
-            "1": [993.72]
-        }
-    },
-    "gps": {
-        "datetime": [ISODate("2023-03-07T16:52:06Z")],
-        "position": [[54.432657166666665, 24.524455833333334]],
-        "lat_dir": ["N"],
-        "lon_dir": ["E"],
-        "altitude": [-30.9],
-        "alt_unit": "M",
-        "num_sats": [6],
-        "PDOP": [2.99],
-        "HDOP": [1.65],
-        "VDOP": [2.5]
-    }
+  _id: ObjectId("64b7f0b4c1e292e1031d7960"),
+  datetime: ISODate("2023-06-01T00:00:10.000Z"),
+  'particulate_matter+0': {
+    sensor: 'particulate_matter',
+    index: 0,
+    type: 'nextpm',
+    PM1count: 352,
+    'PM2,5count': 356,
+    PM10count: 357,
+    PM1mass: 26.4,
+    'PM2,5mass': 48.1,
+    PM10mass: 95.1,
+    sensor_T: 32.41,
+    sensor_RH: 66.35
+  },
+  'particulate_matter+1': {
+    sensor: 'particulate_matter',
+    index: 1,
+    type: 'nextpm',
+    PM1count: 348,
+    'PM2,5count': 352,
+    PM10count: 353,
+    PM1mass: 26.2,
+    'PM2,5mass': 49.8,
+    PM10mass: 94.2,
+    sensor_T: 32.4,
+    sensor_RH: 65.76
+  },
+
+  'air_sensor+0': {
+    sensor: 'air_sensor',
+    index: 0,
+    type: 'bme280',
+    humidity: 66.47275681439535,
+    temperature: 30.767578125,
+    pressure: 1002.4082226264245
+  },
+
+  'air_sensor+1': {
+    sensor: 'air_sensor',
+    index: 1,
+    type: 'ms8607',
+    humidity: 63.934844970703125,
+    temperature: 30.9,
+    pressure: 1002.66
+  },
+
+  gps: {
+    sensor: 'gps',
+    index: 0,
+    position: [ 54.433136166666664, 24.5248245 ],
+    lat_dir: 'N',
+    lon_dir: 'E',
+    altitude: 128.7,
+    alt_unit: 'M',
+    PDOP: 1.87,
+    HDOP: 1.14,
+    VDOP: 1.48
+  }
 }
 ```
 
