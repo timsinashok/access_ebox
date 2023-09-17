@@ -1,5 +1,5 @@
 
-# Access Lab Measurement Stations
+# Access IoT Environmental Monitoring Stations
 
 Version 2.1.0
 This version introduces a user interface to graph data collected by a station.
