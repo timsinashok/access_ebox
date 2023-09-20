@@ -60,8 +60,11 @@ $ export FLASK_APP=receiver.py
 ```
 $ flask run --host=0.0.0.0 --port=3500 --cert=cert.pem --key=key.pem
 ```
+or using nohup:
+```
+$ nohup flask run --host=0.0.0.0 --port=3500 --cert=cert.pem --key=key.pem >receiver.out 2>&1 &
+```
 --host=0.0.0.0 will run the app on all available interfaces, including the public IP of the machine.
-
 The *cert.pem* and *key.pem* files are already on the machine and distributed to the stations. If the files need to be re-generated, this can be done with this command:
 
 ```
@@ -281,7 +284,11 @@ Upon being accessed, the dashboard will load all of the .nc and .csv files in th
 
 While in the ACCESS/voila/files directory, the dashboard can be hosted by the following command:
 ```console
-$ voila --no-browser --VoilaConfiguration.file_whitelist="['.*.(nc|.csv|.png)']" --Voila.ip=0.0.0.0 --port=3600 iot_data_dashboard.ipynb
+$ voila --no-browser --VoilaConfiguration.file_whitelist="['.*.(nc|csv|png)']" --Voila.ip=0.0.0.0 --port=3600 iot_data_dashboard.ipynb
+```
+or using nohup:
+```
+$ nohup voila --no-browser --VoilaConfiguration.file_whitelist="['.*.(nc|csv|png)']" --Voila.ip=0.0.0.0 --port=3600 iot_data_dashboard.ipynb > voila.out 2>&1 &
 ```
 Similar to the receiver, --Voila.ip=0.0.0.0 will host the webpage on all interfaces, and after running this command on the machine the dashboard can be accessed at ```http://<public_ip>:3600```.
 
