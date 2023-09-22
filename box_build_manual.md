@@ -1,7 +1,7 @@
 # Ebox Build Manual
 
 ### 1. Required Components
-All the components needed to build a an ebox are listed below:
+All the components needed to build an ebox are listed below:
 
 | Component name                 | Count                |
 |--------------------------------|----------------------|
